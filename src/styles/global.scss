@@ -1,0 +1,18 @@
+@import 'variables';
+
+body {
+  margin: 0;
+  background-color: $color-bg;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  background: #121226 !important;
+}
+
+a {
+  cursor: pointer;
+  color: $color-brand;
+}
+
+* {
+  box-sizing: border-box;
+}
