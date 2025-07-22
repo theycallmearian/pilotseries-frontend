@@ -33,16 +33,18 @@ export default function RegisterForm({ switchToLogin }) {
   const checks = {
     length: password.length >= 8,
     uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
     number: /[0-9]/.test(password),
     symbol: /[!@#$%^&*(),.?":{}|<>]/.test(password)
   }
+
   const allValid = Object.values(checks).every(Boolean)
 
   const requirements = [
-    { check: checks.length, label: '8+', emoji: '🔒' },
-    { check: checks.uppercase, label: 'M', emoji: '🔠' },
-    { check: checks.number, label: '#', emoji: '🔢' },
-    { check: checks.symbol, label: '@', emoji: '✨' }
+    { check: checks.length, label: '8+' },
+    { check: checks.uppercase && checks.lowercase, label: 'Aa' },
+    { check: checks.number, label: '123' },
+    { check: checks.symbol, label: '!@#' }
   ]
 
   const handleFotoChange = (e) => {
@@ -92,7 +94,11 @@ export default function RegisterForm({ switchToLogin }) {
       showSuccess('Registro exitoso, bienvenido/a 👋')
       navigate('/app')
     } catch (e) {
-      showError(e.message)
+      if (e.message.toLowerCase().includes('failed to fetch')) {
+        showError('No se pudo conectar con el servidor. Inténtalo más tarde.')
+      } else {
+        showError(e.message)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -161,6 +167,7 @@ export default function RegisterForm({ switchToLogin }) {
           _placeholder={{ color: 'green.300', opacity: 1 }}
         />
       </FormControl>
+
       <FormControl mb={3} isRequired>
         <FormLabel color='white'>Email</FormLabel>
         <Input
@@ -172,6 +179,7 @@ export default function RegisterForm({ switchToLogin }) {
           _placeholder={{ color: 'green.300', opacity: 1 }}
         />
       </FormControl>
+
       <FormControl mb={3} isRequired>
         <FormLabel color='white'>Contraseña</FormLabel>
         <Input
@@ -194,13 +202,13 @@ export default function RegisterForm({ switchToLogin }) {
                 fontSize='lg'
                 mr={2}
               >
-                {req.emoji}
-                {req.label}
+                {req.check ? '🟢' : '🔴'}{req.label}
               </Text>
             ))}
           </Text>
         </VStack>
       </FormControl>
+
       <FormControl mb={4} isRequired>
         <FormLabel color='white'>Repite la contraseña</FormLabel>
         <Input
