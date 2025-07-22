@@ -32,16 +32,17 @@ export default function ProfileEditForm({ user, onSuccess, onCancel }) {
   const checks = {
     length: password.length === 0 || password.length >= 8,
     uppercase: password.length === 0 || /[A-Z]/.test(password),
+    lowercase: password.length === 0 || /[a-z]/.test(password),
     number: password.length === 0 || /[0-9]/.test(password),
     symbol: password.length === 0 || /[!@#$%^&*(),.?":{}|<>]/.test(password)
   }
   const allValid = Object.values(checks).every(Boolean)
 
   const requirements = [
-    { check: checks.length, label: '8+', emoji: '🔒' },
-    { check: checks.uppercase, label: 'M', emoji: '🔠' },
-    { check: checks.number, label: '#', emoji: '🔢' },
-    { check: checks.symbol, label: '@', emoji: '✨' }
+    { check: checks.length, label: '8+' },
+    { check: checks.uppercase && checks.lowercase, label: 'Aa' },
+    { check: checks.number, label: '123' },
+    { check: checks.symbol, label: '!@#' }
   ]
 
   const handleFotoChange = (e) => {
@@ -93,7 +94,9 @@ export default function ProfileEditForm({ user, onSuccess, onCancel }) {
       onSuccess?.()
     } catch (err) {
       toast({
-        title: err.message || 'Error al actualizar perfil',
+        title: err.message.toLowerCase().includes('failed to fetch')
+          ? 'No se pudo conectar con el servidor. Inténtalo más tarde.'
+          : err.message || 'Error al actualizar perfil',
         status: 'error'
       })
     } finally {
@@ -183,7 +186,6 @@ export default function ProfileEditForm({ user, onSuccess, onCancel }) {
           onChange={(e) => setEmail(e.target.value)}
           required
           color='brand.200'
-          _placeholder={{ color: 'green.300', opacity: 1 }}
         />
       </FormControl>
 
@@ -194,30 +196,17 @@ export default function ProfileEditForm({ user, onSuccess, onCancel }) {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           color='brand.200'
-          _placeholder={{ color: 'green.300', opacity: 1 }}
         />
-        <VStack align='start' mt={1} spacing={0}>
-          <Text fontSize='xs' color='gray.300' mb={1}>
-            Requisitos:&nbsp;
-            {requirements.map((req, i) => (
-              <Text
-                as='span'
-                key={i}
-                fontWeight='bold'
-                color={req.check ? 'green.300' : 'red.400'}
-                fontSize='lg'
-                mr={2}
-              >
-                {req.emoji}
-                {req.label}
-              </Text>
-            ))}
-          </Text>
-        </VStack>
+        <Text fontSize='xs' color='gray.300' mb={1}>
+          Requisitos:&nbsp;
+          {requirements.map((req, i) => (
+            <Text as='span' key={i} fontWeight='bold' color={req.check ? 'green.300' : 'red.400'} fontSize='lg' mr={2}>
+              {req.check ? '🟢' : '🔴'}{req.label}
+            </Text>
+          ))}
+        </Text>
         {errors.password && (
-          <Text color='red.300' fontSize='sm'>
-            {errors.password}
-          </Text>
+          <Text color='red.300' fontSize='sm'>{errors.password}</Text>
         )}
       </FormControl>
 
@@ -228,34 +217,17 @@ export default function ProfileEditForm({ user, onSuccess, onCancel }) {
           value={repeatPassword}
           onChange={(e) => setRepeatPassword(e.target.value)}
           color='brand.200'
-          _placeholder={{ color: 'green.300', opacity: 1 }}
         />
         {errors.repeatPassword && (
-          <Text color='red.300' fontSize='sm'>
-            {errors.repeatPassword}
-          </Text>
+          <Text color='red.300' fontSize='sm'>{errors.repeatPassword}</Text>
         )}
       </FormControl>
 
-      <Flex mt={2} gap={2} justify='center'>
-        <Button
-          type='submit'
-          bg='brand.500'
-          color='white'
-          _hover={{ bg: 'brand.200', color: 'black' }}
-          width='100%'
-          isLoading={submitting}
-          fontWeight='bold'
-        >
+      <Flex mt={2} gap={2}>
+        <Button type='submit' bg='brand.500' color='white' isLoading={submitting} width='100%'>
           Guardar cambios
         </Button>
-        <Button
-          background='white'
-          color='red'
-          fontWeight='bold'
-          onClick={onCancel}
-          width='100%'
-        >
+        <Button background='white' color='red' width='100%' onClick={onCancel}>
           Cancelar
         </Button>
       </Flex>
